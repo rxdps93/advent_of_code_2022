@@ -1,6 +1,6 @@
 # Advent of Code 2022
 
-I'm doing it in Java.
+I'm doing it in Kotlin.
 
 [Join in the fun!](adventofcode.com)
 
