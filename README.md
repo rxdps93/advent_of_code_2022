@@ -4,9 +4,9 @@ I'm doing it in Kotlin.
 
 [Join in the fun!](adventofcode.com)
 
-- [ ] Day 1
+- [x] Day 1
   - [x] puzzle 1
-  - [ ] puzzle 2
+  - [x] puzzle 2
 - [ ] Day 2
   - [ ] puzzle 1
   - [ ] puzzle 2
