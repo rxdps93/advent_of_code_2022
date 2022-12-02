@@ -3,7 +3,7 @@ package puzzle1
 import java.io.File
 
 fun outcome(round: Pair<String, String>): Int {
-    var score = round.second.first().code - 87;
+    var score = round.second.first().code - 87
 
     when (round.second.first().code - round.first.first().code) {
         21 -> score += 6
