@@ -8,7 +8,7 @@ I'm doing it in Kotlin.
   - [x] puzzle 1
   - [x] puzzle 2
 - [ ] Day 2
-  - [ ] puzzle 1
+  - [x] puzzle 1
   - [ ] puzzle 2
 - [ ] Day 3
   - [ ] puzzle 1
