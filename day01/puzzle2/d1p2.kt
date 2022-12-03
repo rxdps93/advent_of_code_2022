@@ -1,7 +1,7 @@
 import java.io.File
 
 fun main(args : Array<String>) {
-    val fileName = "../input.txt"
+    val fileName = "day01/input.txt"
     val lines: List<String> = File(fileName).readLines()
 
     var elfCals: ArrayList<Int> = arrayListOf()
