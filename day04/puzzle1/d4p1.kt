@@ -14,7 +14,6 @@ fun main(args : Array<String>) {
 
         if ((first[0].toInt() >= second[0].toInt() && first[1].toInt() <= second[1].toInt()) ||
                 (second[0].toInt() >= first[0].toInt() && second[1].toInt() <= first[1].toInt())) {
-            println("$first\t|\t$second")
             containedPairs++;
         }
     }
