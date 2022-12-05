@@ -1,3 +1,5 @@
+package day01.puzzle2
+
 import java.io.File
 
 fun main(args : Array<String>) {
