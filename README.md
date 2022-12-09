@@ -28,9 +28,9 @@ I'm doing it in Kotlin.
 - [x] Day 8
   - [x] puzzle 1
   - [x] puzzle 2
-- [ ] Day 9
+- [x] Day 9
   - [x] puzzle 1
-  - [ ] puzzle 2
+  - [x] puzzle 2
 - [ ] Day 10
   - [ ] puzzle 1
   - [ ] puzzle 2

@@ -5,9 +5,9 @@ import kotlin.math.abs
 public class Knot() {
     private var x = 0
     private var y = 0
-    private var visited: MutableSet<Pair<Int, Int>> = mutableSetOf()
+    private var visited: MutableSet<Pair<Int, Int>> = mutableSetOf(Pair(0, 0))
 
-    fun getPosition(): Pair<Int, Int> {
+    private fun getPosition(): Pair<Int, Int> {
         return Pair(x, y)
     }
 
