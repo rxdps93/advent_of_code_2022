@@ -2,77 +2,122 @@ package day08.puzzle2
 
 import java.io.File
 
-fun printGrid(grid: Array<BooleanArray>) {
+fun printGrid(grid: Array<IntArray>) {
 
     for (row in grid) {
         for (tree in row) {
-            print(if (tree) "T" else "F")
+            print(tree)
         }
         println()
     }
     println()
 }
 
+fun viewLeft(view: String, tree: Int): Int {
+
+    println("$tree > ${view.reversed()}")
+    var visible = 0
+    for (t in view.reversed()) {
+        visible++;
+
+        if (t.digitToInt() >= tree) {
+            break
+        }
+    }
+
+    println("left: $visible")
+    return visible
+}
+
+fun viewRight(view: String, tree: Int): Int {
+    println("$tree > $view")
+    var visible = 0
+    for (t in view) {
+        visible++
+
+        if (t.digitToInt() >= tree) {
+            break
+        }
+    }
+
+    println("right: $visible")
+    return visible
+}
+
+fun viewUp(view: String, tree: Int): Int {
+    println("$tree ^ ${view.reversed()}")
+    var visible = 0
+    for (t in view.reversed()) {
+        visible++
+
+        if (t.digitToInt() >= tree) {
+            break
+        }
+    }
+
+    println("up: $visible")
+    return visible
+}
+
+fun viewDown(view: String, tree: Int): Int {
+    println("$tree v $view")
+    var visible = 0
+    for (t in view) {
+        visible++
+
+        if (t.digitToInt() >= tree) {
+            break;
+        }
+    }
+
+    println("down: $visible")
+    return visible
+}
+
+fun getView(view: String, tree: Int): Int {
+    var visible = 0
+    for (t in view) {
+        visible++
+
+        if (t.digitToInt() >= tree) {
+            break;
+        }
+    }
+
+    return visible;
+}
+
+fun getColumn(grid: List<String>, col: Int): String {
+    val column = CharArray(grid.size)
+
+    for (i in grid.indices) {
+        column[i] = grid[i][col]
+    }
+
+    return column.joinToString("")
+}
+
 fun main(args : Array<String>) {
-    val fileName = "day08/input.txt"
+    val fileName = "day08/testInput.txt"
     val lines: List<String> = File(fileName).readLines()
 
     val rows = lines.size
     val cols = lines[0].length
 
-    val grid = Array(rows) { IntArray(cols) }
+    val grid = Array(rows) { IntArray(cols) { 0 } }
 
-    // Mark Outsides
-    grid[0] = IntArray(cols) { 0 }
-    grid[rows - 1] = IntArray(cols) { 0 }
-    for (row in grid) {
-        row[0] = 0
-        row[row.size - 1] = 0
-    }
-
-    // Visible From Left
+    // Which trees to consider
     for (row in 1 until rows - 1) {
-        var max = lines[row][0].digitToInt()
         for (col in 1 until cols - 1) {
-            if (lines[row][col].digitToInt() > max) {
-                max = lines[row][col].digitToInt()
-                grid[row][col] = 0
-            }
+            grid[row][col] += (
+                            viewLeft(lines[row].substring(0, col), lines[row][col].digitToInt()) *
+                            viewRight(lines[row].substring(col + 1, cols), lines[row][col].digitToInt()) *
+                            viewUp(getColumn(lines, col).substring(0, row), lines[row][col].digitToInt()) *
+                            viewDown(getColumn(lines, col).substring(row + 1, rows), lines[row][col].digitToInt()))
+            println()
         }
     }
 
-    // Visible From Right
-    for (row in 1 until rows - 1) {
-        var max = lines[row][cols - 1].digitToInt()
-        for (col in cols - 1 downTo 1) {
-            if (lines[row][col].digitToInt() > max) {
-                max = lines[row][col].digitToInt()
-                grid[row][col] = 0
-            }
-        }
-    }
+    printGrid(grid)
 
-    // Visible From Top
-    for (col in 1 until cols - 1) {
-        var max = lines[0][col].digitToInt()
-        for (row in 1 until rows - 1) {
-            if (lines[row][col].digitToInt() > max) {
-                max = lines[row][col].digitToInt()
-                grid[row][col] = 0
-            }
-        }
-    }
-
-    // Visible From Bottom
-    for (col in 1 until cols - 1) {
-        var max = lines[rows - 1][col].digitToInt()
-        for (row in cols - 1 downTo 1) {
-            if (lines[row][col].digitToInt() > max) {
-                max = lines[row][col].digitToInt()
-                grid[row][col] = 0
-            }
-        }
-    }
-
-//    println("There are ${grid.sumOf { it -> it.count { it } }} trees visible");
 }
