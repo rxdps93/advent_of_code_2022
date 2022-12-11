@@ -1,4 +1,4 @@
-package day10.puzzle1
+package day10.puzzle2
 
 import java.io.File
 
@@ -6,26 +6,34 @@ fun main(args : Array<String>) {
     val fileName = "day10/input.txt"
 
     var x = 1
-    var str = 0;
     var step = 0
+    var pixel = 0
+    var img = CharArray(240) { '.' }
     File(fileName).forEachLine {
         var instr = it.split(" ")
         step++;
-        if (step % 40 == 20) {
-            println("At step $step the signal strength is ${x * step}")
-            str += (x * step)
+        pixel = (step - 1) % 40
+        if (pixel == x || pixel == x + 1 || pixel == x - 1) {
+            img[step - 1] = '#'
         }
 
         if (instr[0] == "addx") {
+
             step++;
-            if (step % 40 == 20) {
-                println("At step $step the signal strength is ${x * step}")
-                str += (x * step)
+            pixel = (step - 1) % 40
+            if (pixel == x || pixel == x + 1 || pixel == x - 1) {
+                img[step - 1] = '#'
             }
+
             x += instr[1].toInt()
         }
     }
 
-    println("The value in the X register is $x")
-    println("The sum of signal strengths is $str")
+    pixel = 0
+    for (row in 0..5) {
+        for (col in 0..39) {
+            print(img[pixel++])
+        }
+        println()
+    }
 }

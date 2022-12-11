@@ -12,14 +12,12 @@ fun main(args : Array<String>) {
         var instr = it.split(" ")
         step++;
         if (step % 40 == 20) {
-            println("At step $step the signal strength is ${x * step}")
             str += (x * step)
         }
 
         if (instr[0] == "addx") {
             step++;
             if (step % 40 == 20) {
-                println("At step $step the signal strength is ${x * step}")
                 str += (x * step)
             }
             x += instr[1].toInt()
