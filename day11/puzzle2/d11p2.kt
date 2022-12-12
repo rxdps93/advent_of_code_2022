@@ -1,4 +1,4 @@
-package day11.puzzle1
+package day11.puzzle2
 
 import day11.util.Monkey
 import java.io.File
@@ -9,10 +9,11 @@ fun main(args: Array<String>) {
 
     val monkeys: ArrayList<Monkey> = arrayListOf()
     var counter = 0;
+    var reducer = 1L;
     lines.forEach { line ->
         when (counter % 7) {
             0 -> {
-                monkeys.add(Monkey(monkeys.size, 3L))
+                monkeys.add(Monkey(monkeys.size, 1))
             }
             1 -> {
                 line.filter { it.isDigit() || it == ',' }.split(",").forEach {
@@ -25,6 +26,7 @@ fun main(args: Array<String>) {
             }
             3 -> {
                 monkeys.last().setTest(line.filter { it.isDigit() }.toLong())
+                reducer *= monkeys.last().getTest()
             }
             4 -> {
                 monkeys.last().setTrueMonkey(line.last().digitToInt())
@@ -37,12 +39,13 @@ fun main(args: Array<String>) {
         counter++
     }
 
-    for (round in 1..20) {
+    for (round in 1..10000) {
         for (monkey in monkeys) {
             while (monkey.getItems().isNotEmpty()) {
-                monkey.inspectItem(monkeys[monkey.getTrueMonkey()], monkeys[monkey.getFalseMonkey()])
+                monkey.inspectItem(monkeys[monkey.getTrueMonkey()], monkeys[monkey.getFalseMonkey()], reducer)
             }
         }
+
     }
 
     monkeys.forEach { println("Monkey ${it.id} inspected items ${it.getInspected()} times.") }

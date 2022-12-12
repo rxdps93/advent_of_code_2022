@@ -1,24 +1,26 @@
 package day11.util
 
-class Monkey(val id: Int) {
+import java.math.BigInteger
 
-    private val items: ArrayDeque<Int> = ArrayDeque()
-    private var numInspected = 0
+class Monkey(val id: Int, private val relief: Long) {
+
+    private val items: ArrayDeque<Long> = ArrayDeque()
+    private var numInspected = 0L
     private var operator: Char = '+'
     private var amnt: String = ""
-    private var div: Int = 0
+    private var div: Long = 0
     private var ifTrue: Int = 0
     private var ifFalse: Int = 0
 
-    fun getInspected(): Int {
+    fun getInspected(): Long {
         return numInspected
     }
 
-    fun addItem(item: Int) {
+    fun addItem(item: Long) {
         items.addLast(item)
     }
 
-    fun getItems(): ArrayDeque<Int> {
+    fun getItems(): ArrayDeque<Long> {
         return this.items
     }
 
@@ -27,7 +29,11 @@ class Monkey(val id: Int) {
         this.amnt = if (amnt == "") "old" else amnt
     }
 
-    fun setTest(div: Int) {
+    fun getTest(): Long {
+        return this.div
+    }
+
+    fun setTest(div: Long) {
         this.div = div
     }
 
@@ -47,13 +53,17 @@ class Monkey(val id: Int) {
         this.ifFalse = monkey
     }
 
-    fun inspectItem(trueMonkey: Monkey, falseMonkey: Monkey) {
+    fun inspectItem(trueMonkey: Monkey, falseMonkey: Monkey, reducer: Long? = null) {
 
         numInspected++
+        if (reducer != null) {
+            items[0] %= reducer
+        }
+
         var amntInt = if (amnt == "old") {
             items[0]
         } else {
-            amnt.toInt()
+            amnt.toLong()
         }
         when (operator) {
             '*' -> {
@@ -64,9 +74,9 @@ class Monkey(val id: Int) {
             }
         }
 
-        items[0] /= 3
+        items[0] /= this.relief
 
-        if (items[0] % div == 0) {
+        if (items[0] % div == 0L) {
             trueMonkey.items.addLast(items.removeFirst())
         } else {
             falseMonkey.items.addLast(items.removeFirst())
