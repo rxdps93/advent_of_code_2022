@@ -1,38 +1,75 @@
 package day11.util
 
-class Monkey(private val id: Int, private val operator: Char, private val amnt: Int,
-             private val div: Int, private val ifTrue: Monkey, private val ifFalse: Monkey) {
+class Monkey(val id: Int) {
 
     private val items: ArrayDeque<Int> = ArrayDeque()
     private var numInspected = 0
+    private var operator: Char = '+'
+    private var amnt: String = ""
+    private var div: Int = 0
+    private var ifTrue: Int = 0
+    private var ifFalse: Int = 0
 
-    fun inspectItem() {
+    fun getInspected(): Int {
+        return numInspected
+    }
+
+    fun addItem(item: Int) {
+        items.addLast(item)
+    }
+
+    fun getItems(): ArrayDeque<Int> {
+        return this.items
+    }
+
+    fun setOperation(operator: Char, amnt: String) {
+        this.operator = operator
+        this.amnt = if (amnt == "") "old" else amnt
+    }
+
+    fun setTest(div: Int) {
+        this.div = div
+    }
+
+    fun getTrueMonkey(): Int {
+        return this.ifTrue
+    }
+
+    fun getFalseMonkey(): Int {
+        return this.ifFalse
+    }
+
+    fun setTrueMonkey(monkey: Int) {
+        this.ifTrue = monkey
+    }
+
+    fun setFalseMonkey(monkey: Int) {
+        this.ifFalse = monkey
+    }
+
+    fun inspectItem(trueMonkey: Monkey, falseMonkey: Monkey) {
 
         numInspected++
-        println("Monkey $id:")
-        println("\tMonkey inspects an item with a worry level of ${items.first()}.")
+        var amntInt = if (amnt == "old") {
+            items[0]
+        } else {
+            amnt.toInt()
+        }
         when (operator) {
             '*' -> {
-                items[0] *= amnt
-                println("\t\tWorry level is multiplied by $amnt to ${items.first()}.")
+                items[0] *= amntInt
             }
             '+' -> {
-                items[0] += amnt
-                println("\t\tWorry level increases by $amnt to ${items.first()}.")
+                items[0] += amntInt
             }
         }
 
         items[0] /= 3
-        println("\t\tMonkey gets bored with item. Worry level is divided by 3 to ${items.first()}.")
 
         if (items[0] % div == 0) {
-            println("\t\tCurrent worry level is divisible by $div.")
-            ifTrue.items.addLast(items.removeFirst())
-            println("\t\tItem with worry level ${items.first()} is thrown to monkey ${ifTrue.id}.")
+            trueMonkey.items.addLast(items.removeFirst())
         } else {
-            println("\t\tCurrent worry level is not divisible by $div.")
-            ifFalse.items.addLast(items.removeFirst())
-            println("\t\tItem with worry level ${items.first()} is thrown to monkey ${ifFalse.id}.")
+            falseMonkey.items.addLast(items.removeFirst())
         }
     }
 }
