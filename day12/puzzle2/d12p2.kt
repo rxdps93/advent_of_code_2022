@@ -1,36 +1,10 @@
-package day12.puzzle1
+package day12.puzzle2
 
 import day12.util.Square
 import java.io.File
+import kotlin.math.min
 
-fun main(args : Array<String>) {
-    val lines: List<String> = File("day12/input.txt").readLines()
-
-    var grid: Array<Array<Square>> = Array(lines.size) { Array(lines[0].length) { Square() } }
-
-    var start: Pair<Int, Int> = Pair(0, 0)
-    var end: Pair<Int, Int> = Pair(0, 0)
-
-    for (row in grid.indices) {
-        for (col in grid[0].indices) {
-
-            var h = lines[row][col].code - 97
-            when (lines[row][col]) {
-                'S' -> {
-                    start = Pair(row, col)
-                    h = 0
-                }
-                'E' -> {
-                    end = Pair(row, col)
-                    h = 25
-                }
-            }
-
-            grid[row][col] = Square(row, col, h)
-
-        }
-    }
-
+fun findPath(grid: Array<Array<Square>>, start: Pair<Int, Int>, end: Pair<Int, Int>): Int {
     // neighbors and h-score
     for (row in grid.indices) {
         for (col in grid[0].indices) {
@@ -95,12 +69,58 @@ fun main(args : Array<String>) {
 
     }
 
-    var path: ArrayDeque<Square> = ArrayDeque()
-    path.addFirst(current)
-    while (parent.containsKey(current)) {
-        current = parent[current]!!
+    if (visited.contains(grid[end.first][end.second])) {
+        var path: ArrayDeque<Square> = ArrayDeque()
         path.addFirst(current)
+        while (parent.containsKey(current)) {
+            current = parent[current]!!
+            path.addFirst(current)
+        }
+
+        return path.size - 1
+    } else {
+        return -1
+    }
+}
+
+fun main(args : Array<String>) {
+    val lines: List<String> = File("day12/input.txt").readLines()
+
+    var grid: Array<Array<Square>> = Array(lines.size) { Array(lines[0].length) { Square() } }
+
+    var startList: ArrayList<Pair<Int, Int>> = arrayListOf()
+    var end: Pair<Int, Int> = Pair(0, 0)
+
+    for (row in lines.indices) {
+        for (col in lines[0].indices) {
+
+            var h = lines[row][col].code - 97
+            when (lines[row][col]) {
+                'a' -> {
+                    startList.add(Pair(row, col))
+                }
+                'S' -> {
+                    startList.add(Pair(row, col))
+                    h = 0
+                }
+                'E' -> {
+                    end = Pair(row, col)
+                    h = 25
+                }
+            }
+
+            grid[row][col] = Square(row, col, h)
+
+        }
     }
 
-    println("The path includes ${path.size} squares, which means the goal can be reached in ${path.size - 1} steps.")
+    var min = Int.MAX_VALUE
+    for (start in startList) {
+        val dist = findPath(grid, start, end)
+        if (dist != -1) {
+            min = min(dist, min)
+        }
+    }
+
+    println("The shortest possible path from an 'a' square to the end is $min steps.")
 }
