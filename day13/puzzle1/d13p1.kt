@@ -1,65 +1,60 @@
 package day13.puzzle1
 
+import day13.util.IntegerNode
+import day13.util.ListNode
 import java.io.File
+import day13.util.SignalNode
 
-interface SignalNode
+fun parse(packet: Iterator<String>): SignalNode {
 
-private class IntegerNode(val value: Int): SignalNode {
-    fun toList(): SignalNode {
-        return ListNode(listOf(this))
-    }
-}
-
-private class ListNode(val nodes: List<SignalNode>): SignalNode {
-
-}
-
-fun solve(left: String, right: String, pairIndex: Int): Int {
-
-    println("Pair #$pairIndex:")
-    println("\t left: $left")
-    println("\tright: $right")
-
-    println(left.toList())
-    println(right.toList())
-    return 0
-}
-
-fun parse(packet: CharIterator): SignalNode {
     var nodes = mutableListOf<SignalNode>()
     while (packet.hasNext()) {
-        when (val char = packet.next()) {
-            '[' -> nodes.add(parse(packet))
-            ']' -> return ListNode(nodes)
-            else -> nodes.add(IntegerNode(char.digitToInt()))
+        when (val token = packet.next()) {
+            "[" -> nodes.add(parse(packet))
+            "]" -> return ListNode(nodes)
+            else -> nodes.add(IntegerNode(token.toInt()))
+        }
+    }
+    return ListNode(nodes)
+}
+
+fun splitTokens(packet: String): List<String> {
+    var tokens = mutableListOf<String>()
+    var digit: CharArray = charArrayOf()
+    packet.forEach {
+
+        when (it) {
+            '[' -> tokens.add("[")
+            ']' -> {
+                if (digit.isNotEmpty()) {
+                    tokens.add(String(digit))
+                    digit = charArrayOf()
+                }
+                tokens.add("]")
+            }
+            ',' -> {
+                if (digit.isNotEmpty()) {
+                    tokens.add(String(digit))
+                    digit = charArrayOf()
+                }
+            }
+            else -> {
+                digit += it
+            }
         }
     }
 
-    return ListNode(nodes)
+    return tokens
 }
 
 fun main(args : Array<String>) {
 
-    var input = File("day13/inputTest.txt").readLines().filter { it.isNotBlank() }.map {
-        parse(it.filter { it != ',' }.toCharArray().iterator())
+    var input = File("day13/input.txt").readLines().filter { it.isNotBlank() }.map {
+        parse(splitTokens(it).iterator())
     }
 
-    var test = "[1,[2,3],4,5]"
-    var nodes = parse(test.filter { it != ',' }.toCharArray().iterator())
+    var sum = 0
+    input.chunked(2).forEachIndexed { index, pair -> sum += if (pair.first() < pair.last()) index + 1 else 0 }
 
-    println("hello")
-//    var left = ""
-//    var pairIndex = 1
-//    var orderSum = 0
-//    input.forEach {
-//        if (left == "") {
-//            left = it
-//        } else {
-//            orderSum += solve(left, it, pairIndex)
-//            left = ""
-//            pairIndex++
-//        }
-//    }
-//
-//    println("The sum of properly ordered pair indices is $orderSum.")
+    println("The sum of properly ordered pair indices is $sum.")
 }
