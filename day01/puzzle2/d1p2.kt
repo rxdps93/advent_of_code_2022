@@ -2,9 +2,8 @@ package day01.puzzle2
 
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day01/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day01/input.txt").readLines()
 
     var elfCals: ArrayList<Int> = arrayListOf()
     var sum: Int = 0

@@ -19,7 +19,7 @@ fun expandFloor(grid: Array<CharArray>) {
     }
     grid[grid.lastIndex] = ('#' + String(grid[grid.lastIndex]) + '#').toCharArray()
 }
-fun dropSand(grid: Array<CharArray>, xrange: IntRange, ymax: Int): Int {
+fun dropSand(grid: Array<CharArray>, xrange: IntRange): Int {
 
     var sand = 0
     var sandSpawn = 500 - xrange.first

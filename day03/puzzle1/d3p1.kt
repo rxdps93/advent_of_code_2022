@@ -2,9 +2,8 @@ package day03.puzzle1
 
 import java.io.File
 
-fun main(args: Array<String>) {
-    val fileName = "day03/input.txt"
-    val rucksacks: List<String> = File(fileName).readLines()
+fun main() {
+    val rucksacks = File("day03/input.txt").readLines()
 
     val priorities = ('a'..'z') + ('A' .. 'Z')
     var commonFlag: BooleanArray

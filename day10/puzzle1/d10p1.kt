@@ -2,13 +2,12 @@ package day10.puzzle1
 
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day10/input.txt"
+fun main() {
 
     var x = 1
     var str = 0;
     var step = 0
-    File(fileName).forEachLine {
+    File("day10/input.txt").forEachLine {
         var instr = it.split(" ")
         step++;
         if (step % 40 == 20) {

@@ -28,9 +28,8 @@ fun outcome(round: Pair<String, String>): Int {
     return score
 }
 
-fun main(args: Array<String>) {
-    val fileName = "day02/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day02/input.txt").readLines()
 
     val rounds: ArrayList<Pair<String, String>> = arrayListOf()
     lines.forEach {

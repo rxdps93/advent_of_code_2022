@@ -2,9 +2,8 @@ package day04.puzzle2
 
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day04/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day04/input.txt").readLines()
 
     var overlap = 0
     lines.forEach {

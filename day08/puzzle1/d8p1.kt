@@ -2,9 +2,8 @@ package day08.puzzle1
 
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day08/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day08/input.txt").readLines()
 
     val rows = lines.size
     val cols = lines[0].length

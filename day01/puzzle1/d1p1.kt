@@ -2,9 +2,8 @@ package day01.puzzle1
 
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day01/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day01/input.txt").readLines()
 
     var maxCals: Int = Int.MIN_VALUE
     var sum: Int = 0

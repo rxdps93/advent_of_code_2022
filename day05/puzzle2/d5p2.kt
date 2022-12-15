@@ -2,9 +2,8 @@ package day05.puzzle2
 
 import java.io.File
 
-fun main(args: Array<String>) {
-    val fileName = "day05/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day05/input.txt").readLines()
 
     var inputSplit = 0
     var stackCount = 0

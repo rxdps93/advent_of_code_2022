@@ -47,7 +47,7 @@ fun splitTokens(packet: String): List<String> {
     return tokens
 }
 
-fun main(args : Array<String>) {
+fun main() {
 
     var input = File("day13/input.txt").readLines().filter { it.isNotBlank() }.map {
         parse(splitTokens(it).iterator())

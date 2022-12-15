@@ -3,9 +3,8 @@ package day09.puzzle2
 import day09.util.Knot
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day09/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day09/input.txt").readLines()
 
     val rope = Array(10) { Knot() } // head = 0, tail = 9
     for (instr in lines) {

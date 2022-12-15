@@ -3,9 +3,8 @@ package day11.puzzle2
 import day11.util.Monkey
 import java.io.File
 
-fun main(args: Array<String>) {
-    val fileName = "day11/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day11/input.txt").readLines()
 
     val monkeys: ArrayList<Monkey> = arrayListOf()
     var counter = 0;

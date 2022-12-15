@@ -2,9 +2,8 @@ package day06.puzzle2
 
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day06/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day06/input.txt").readLines()
 
     var marker = -1
     for (i in 0 until lines[0].length - 13) {

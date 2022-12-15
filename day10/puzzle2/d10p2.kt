@@ -2,14 +2,13 @@ package day10.puzzle2
 
 import java.io.File
 
-fun main(args : Array<String>) {
-    val fileName = "day10/input.txt"
+fun main() {
 
     var x = 1
     var step = 0
-    var pixel = 0
+    var pixel: Int
     var img = CharArray(240) { '.' }
-    File(fileName).forEachLine {
+    File("day10/input.txt").forEachLine {
         var instr = it.split(" ")
         step++;
         pixel = (step - 1) % 40

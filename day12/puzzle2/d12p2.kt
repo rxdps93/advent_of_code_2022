@@ -83,8 +83,8 @@ fun findPath(grid: Array<Array<Square>>, start: Pair<Int, Int>, end: Pair<Int, I
     }
 }
 
-fun main(args : Array<String>) {
-    val lines: List<String> = File("day12/input.txt").readLines()
+fun main() {
+    val lines = File("day12/input.txt").readLines()
 
     var grid: Array<Array<Square>> = Array(lines.size) { Array(lines[0].length) { Square() } }
 

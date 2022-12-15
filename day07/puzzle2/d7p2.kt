@@ -5,9 +5,8 @@ import day07.util.FileType
 import java.io.File
 import java.math.BigInteger
 
-fun main(args : Array<String>) {
-    val fileName = "day07/input.txt"
-    val lines: List<String> = File(fileName).readLines()
+fun main() {
+    val lines = File("day07/input.txt").readLines()
 
     // build tree
     var root: FileNode = FileNode(FileType.DIR, "/")
