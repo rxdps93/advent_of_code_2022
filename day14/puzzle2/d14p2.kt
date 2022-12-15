@@ -44,7 +44,7 @@ fun dropSand(grid: Array<CharArray>, xrange: IntRange): Int {
             sandSpawn++
         }
 
-        if (grid[0][sandSpawn] == 'o' || sand == 1) {
+        if (grid[0][sandSpawn] == 'o') {
             break;
         }
     }
@@ -55,7 +55,7 @@ fun dropSand(grid: Array<CharArray>, xrange: IntRange): Int {
 fun main() {
 
     var pairs = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()
-    File("day14/testInput.txt").forEachLine {
+    File("day14/input.txt").forEachLine {
         var leftCoord = Pair(-1, -1)
         for (coord in it.filterNot { it.isWhitespace() }.split("->")) {
             var pair = coord.split(",")
@@ -85,11 +85,5 @@ fun main() {
     grid[0][500 - xmin] = '+'
     grid[grid.lastIndex] = CharArray((xmax - xmin) + 1) { '#' }
 
-    println("A total of ${dropSand(grid, xmin..xmax, ymax)} units of sand can come to rest.")
-    printGrid(grid)
-//    printGrid(grid)
-//    println()
-//    expandFloor(grid)
-//    printGrid(grid)
-//    println(grid[0][500 - xmin])
+    println("A total of ${dropSand(grid, xmin..xmax)} units of sand can come to rest.")
 }
