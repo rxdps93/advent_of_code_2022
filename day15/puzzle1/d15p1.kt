@@ -1,25 +1,10 @@
 package day15.puzzle1
 
+import day15.util.Sensor
 import java.io.File
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-
-private class Sensor(val location: Pair<Int, Int>, val beacon: Pair<Int, Int>) {
-    constructor(line: List<Int>): this(Pair(line[0], line[1]), Pair(line[2], line[3]))
-
-    fun distanceToBeacon(): Int {
-        return abs(location.first - beacon.first) + abs(location.second - beacon.second)
-    }
-
-    fun distanceTo(other: Sensor): Int {
-        return abs(location.first - other.location.first) + abs(location.second - other.location.second)
-    }
-
-    override fun toString(): String {
-        return "sensor(x=${location.first},y=${location.second}); beacon(x=${beacon.first},y=${beacon.second})"
-    }
-}
 
 fun main() {
     val sensors = File("day15/input.txt").readLines().map { line->
@@ -30,10 +15,6 @@ fun main() {
 
     val xmin = sensors.minOf { min(it.location.first - it.distanceToBeacon(), it.beacon.first) }
     val xmax = sensors.maxOf { max(it.location.first + it.distanceToBeacon(), it.beacon.first) }
-//    val ymin = sensors.minOf { min(it.location.second, it.beacon.second) }
-//    val ymax = sensors.maxOf { max(it.location.second, it.beacon.second) }
-
-//    println("xmin: $xmin, xmax: $xmax, ymin: $ymin, ymax: $ymax")
 
     val taken = mutableSetOf<Pair<Int, Int>>()
     val squares = mutableSetOf<Pair<Int, Int>>()
