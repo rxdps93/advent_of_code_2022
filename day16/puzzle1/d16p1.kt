@@ -33,22 +33,19 @@ fun main() {
     while (queue.isNotEmpty()) {
         var path = queue.removeFirst()
 
-        var end = true
+        if (path.pressureReleased > best) {
+            best = path.pressureReleased
+        }
+
         for (route in path.curValve.routes.entries) {
             var dist = route.value
             var valve = route.key
-            if (path.remaining - dist > 0 && !path.openValves.contains(valve)) {
-                end = false
+            if (path.remaining > 0 && !path.openValves.contains(valve)) {
                 var open = ArrayList(path.openValves)
                 open.add(valve)
                 var pressure = (path.remaining - dist) * valve.flowRate
                 queue.addLast(Path(valve, open, path.remaining - dist, path.pressureReleased + pressure))
             }
-        }
-
-        if (end && path.pressureReleased > best) {
-            println("new best: ${path.curValve}, ${path.remaining}, ${path.pressureReleased}")
-            best = path.pressureReleased
         }
     }
 
