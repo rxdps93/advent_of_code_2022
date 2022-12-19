@@ -8,18 +8,21 @@ fun openValves(remaining: Int,
                curValve: Valve,
                valves: HashMap<String, Valve>,
                targetValves: Set<Valve>,
+               distMap: Map<String, MutableMap<String, Int>>,
                paths: HashMap<Path, Int> = hashMapOf()
 ): Int {
 
     val pressureReleased = remaining * curValve.flowRate
     val path = Path(curValve, targetValves, remaining)
 
-    paths.getOrPut(path) {
-        targetValves.filter { target-> curValve.routes[target]!! < remaining }
-            .takeIf { it.isNotEmpty() }?.maxOf { target->
-                val time = remaining - 1 - curValve.routes[target]!!
-                openValves(time, target, valves,targetValves - target, paths)
-            }?: 0
+    return pressureReleased + paths.getOrPut(path) {
+        val pressure = targetValves.filter { target->
+            distMap.getValue(path.curValve.name).getValue(target.name) < remaining
+        }.takeIf { it.isNotEmpty() }?.maxOf { target->
+            val time = remaining - 1 - distMap.getValue(path.curValve.name).getValue(target.name)
+            openValves(time, target, valves, targetValves - target, distMap, paths)
+        }?: 0
+        maxOf(pressure, 0)
     }
 
 }
@@ -45,31 +48,22 @@ fun main() {
         valve.generateRoutes(workingValves)
     }
 
-    println("Maximum pressure released in 30 minutes is: ${openValves(30, valves["AA"]!!, valves, workingValves)}")
+    val distMap = valves.keys.map { valve->
+        val dists = mutableMapOf<String, Int>().withDefault { Int.MAX_VALUE }.apply { put(valve, 0) }
+        val queue = mutableListOf(valve)
+        while (queue.isNotEmpty()) {
+            val curValve = queue.removeFirst()
+            valves.getValue(curValve).adjacent.forEach { adj->
+                val dist = dists.getValue(curValve) + 1
+                if (dist < dists.getValue(adj)) {
+                    dists[adj] = dist
+                    queue.add(adj)
+                }
+            }
+        }
+        dists
+    }.associateBy { it.keys.first() }
 
-
-//    val queue: ArrayDeque<Path> = ArrayDeque()
-//    queue.addLast(Path(valves["AA"]!!, arrayListOf(valves["AA"]!!), 30, 0))
-//    var best = Int.MIN_VALUE
-//    while (queue.isNotEmpty()) {
-//        var path = queue.removeFirst()
-//
-//        if (path.pressureReleased > best) {
-//            println(path.pressureReleased)
-//            best = path.pressureReleased
-//        }
-//
-//        for (route in path.curValve.routes.entries) {
-//            var dist = route.value
-//            var valve = route.key
-//            if (path.remaining - dist >= 0 && !path.openValves.contains(valve)) {
-//                var open = ArrayList(path.openValves)
-//                open.add(valve)
-//                var pressure = (path.remaining - dist) * valve.flowRate
-//                queue.addLast(Path(valve, open, path.remaining - dist, path.pressureReleased + pressure))
-//            }
-//        }
-//    }
-//
-//    println("Maximum pressure released in 30 minutes is: $best")
+    println("Maximum pressure released in 30 minutes is: " +
+            "${openValves(30, valves.getValue("AA"), valves, workingValves, distMap)}")
 }
