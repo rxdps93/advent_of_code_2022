@@ -44,10 +44,6 @@ fun main() {
 
     val workingValves: HashSet<Valve> = valves.values.filter { it.flowRate > 0 }.toHashSet()
 
-    for (valve in valves.values) {
-        valve.generateRoutes(workingValves)
-    }
-
     val distMap = valves.keys.map { valve->
         val dists = mutableMapOf<String, Int>().withDefault { Int.MAX_VALUE }.apply { put(valve, 0) }
         val queue = mutableListOf(valve)
