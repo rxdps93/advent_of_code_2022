@@ -5,14 +5,14 @@ import java.io.File
 private class Row(var row: String = ".......") {
 
     fun isEmpty(): Boolean {
-        return !row.contains('#')
+        return !row.contains('@') && !row.contains('#')
     }
     override fun toString(): String {
         return this.row
     }
 }
 
-private class Rock(private val rows: Array<Row>, val name: String) {
+private class Rock(private val rows: Array<Row>) {
 
     fun shift(dir: Char): Boolean {
         return when (dir) {
@@ -54,8 +54,33 @@ private class Rock(private val rows: Array<Row>, val name: String) {
 private object Chamber {
     private val rows: ArrayDeque<Row> = ArrayDeque()
 
+    fun mergeDown(): Boolean {
+        return true
+    }
+
+    fun mergeShift(dir: Char) {
+
+    }
+
+    fun restRows() {
+        for (r in rows.indices) {
+            rows[r].row = rows[r].row.replace('@', '#')
+        }
+    }
+
     fun addRow(vararg row: Row) {
-        row.forEach { rows.addFirst(it) }
+        var rest = false
+        row.forEach {
+            rows.addFirst(it)
+        }
+
+        if (rest) {
+            restRows()
+        }
+    }
+
+    fun removeTopRow() {
+        rows.removeFirst()
     }
 
     fun getTopRow(): Row {
@@ -68,38 +93,63 @@ private object Chamber {
 
 }
 
+private fun generateRock(type: Int): Rock {
+    return when (type) {
+        0 -> Rock(arrayOf(Row("..@@@@.")))
+        1 -> Rock(arrayOf(Row("...@..."), Row("..@@@.."), Row("...@...")))
+        2 -> Rock(arrayOf(Row("....@.."), Row("....@.."), Row("..@@@..")))
+        3 -> Rock(arrayOf(Row("..@...."), Row("..@...."), Row("..@...."), Row("..@....")))
+        4 -> Rock(arrayOf(Row("..@@..."), Row("..@@...")))
+        else -> Rock(arrayOf(Row("")))
+    }
+}
+
 fun main() {
-    val input = File("day17/testInput.txt").readLines()[0].toCharArray().joinToString("") { "${it}v" }
+    val input = File("day17/testInput.txt").readLines()[0].toCharArray()
+//            .joinToString("") { "${it}v" }
 
-    val rocks = arrayOf(
-            Rock(arrayOf(
-                    Row("..####.")), "straight boi"),
-            Rock(arrayOf(
-                    Row("...#..."),
-                    Row("..###.."),
-                    Row("...#...")), "plus boi"),
-            Rock(arrayOf(
-                    Row("....#.."),
-                    Row("....#.."),
-                    Row("..###..")), "l boi"),
-            Rock(arrayOf(
-                    Row("..#...."),
-                    Row("..#...."),
-                    Row("..#...."),
-                    Row("..#....")), "tall boi"),
-            Rock(arrayOf(
-                    Row("..##..."),
-                    Row("..##...")), "square boi"))
+//    Chamber.addRow(Row(), Row(), Row()) // add floor
+//    Chamber.addRow(*generateRock(2).getRows())
+//    var test = generateRock(2)
+//    test.shift('<')
+//    test.shift('<')
+//    test.shift('<')
+//    Chamber.addRow(*test.getRows())
+//    Chamber.getRows().forEach { println(it) } // iterates top to bottom
 
-    Chamber.addRow(Row(), Row(), Row()) // add floor
-    Chamber.addRow(*Rock(rocks[2].getRows().reversedArray(), "").getRows())
-    var test = Rock(rocks[2].getRows().reversedArray(), "")
-    test.shift('<')
-    Chamber.addRow(*test.getRows())
-    Chamber.getRows().forEach { println(it) } // iterates top to bottom
+    var shiftIndex = 0
+    for (rockNum in 0 until 2022) {
+        Chamber.addRow(Row(), Row(), Row())
+        var rock = generateRock((rockNum - 1) % 5)
 
+        var atRest = false
+        while (!atRest) {
+            rock.shift(input[shiftIndex])
 
-//    for (rock in 1..2022) {
-//        println(rocks[(rock - 1) % 5].name)
-//    }
+            shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
+            // rock drop step
+            // if no rows below, it comes to rest
+            // check if row below is empty, if so remove that row
+            // if not check if the rock will rest on it (i.e. collision)
+            // if so it comes to rest, if not merge them somehow
+            if (Chamber.getRows().isEmpty()) { // if at floor
+                Chamber.addRow(*rock.getRows())
+                atRest = true
+            } else if (Chamber.getTopRow().isEmpty()) { // empty rows to "drop into"
+                Chamber.removeTopRow()
+            } else {
+                for (i in 0 until 7) { // check if it will immediately come to rest
+                    if (rock.getBottomRow().row[i] == '@' && Chamber.getTopRow().row[i] == '#') {
+                        Chamber.addRow(*rock.getRows())
+                        atRest = true
+                        break
+                    }
+                }
+
+                if (!atRest) {
+                    // do a merge
+                }
+            }
+        }
+    }
 }
