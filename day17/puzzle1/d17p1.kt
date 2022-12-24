@@ -72,6 +72,9 @@ private object Chamber {
         var rest = false
         row.forEach {
             rows.addFirst(it)
+            if (it.row.contains('@')) {
+                rest = true
+            }
         }
 
         if (rest) {
@@ -118,7 +121,7 @@ fun main() {
 //    Chamber.getRows().forEach { println(it) } // iterates top to bottom
 
     var shiftIndex = 0
-    for (rockNum in 0 until 2022) {
+    for (rockNum in 1 until 4) {
         Chamber.addRow(Row(), Row(), Row())
         var rock = generateRock((rockNum - 1) % 5)
 
@@ -147,9 +150,20 @@ fun main() {
                 }
 
                 if (!atRest) {
-                    // do a merge
+                    // 1. do an initial merge down
+                    // 2. check if we are able to rest
+                    // 3. if yes, set flag and convert
+                    // 4. if no, loop through the following procedure:
+                    //    a. merge shift
+                    //    b. merge down
+                    //    c. check if we are able to rest
+                    //    d. if yes, set flag and convert; break loop(s)
+                    //    e. if no the we repeat the procedure
                 }
             }
         }
     }
+
+//    Chamber.getRows().forEach { println(it) } // iterates top to bottom
+//    println("The tower of rocks is ${Chamber.getRows().sumOf { if (it.row.contains('#')) 1L else 0L }} units tall.")
 }
