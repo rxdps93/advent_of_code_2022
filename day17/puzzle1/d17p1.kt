@@ -87,6 +87,11 @@ private object Chamber {
                 }
             }
         }
+
+        for (i in mergeRows.indices) {
+            mergeRows[i]++
+        }
+
         return false
     }
 
@@ -95,16 +100,58 @@ private object Chamber {
         // first check if the merge can happen, then do it. separate loops.
         return when (dir) {
             '<' -> {
+                // verify we can shift
                 mergeRows.forEach { r->
-                    // go 0 until 7
+                    for (i in 0 until 7) {
+                        if (i == 0 && this.rows[r].row[i] == '@') {
+                            false
+                        }
+
+                        if (i > 0 && this.rows[r].row[i] == '@' && this.rows[r].row[i - 1] == '#') {
+                            false
+                        }
+                    }
                 }
-                false
+
+                // execute the shift
+                mergeRows.forEach { r->
+                    for (i in 0 until 7) {
+                        if (this.rows[r].row[i] == '@') {
+                            var str = this.rows[r].row.toCharArray()
+                            str[i] = '.'
+                            str[i - 1] = '@'
+                            this.rows[r].row = String(str)
+                        }
+                    }
+                }
+                true
             }
             '>' -> {
+                // verify we can shift
                 mergeRows.forEach { r->
-                    // go 6 downTo 0
+                    for (i in 6 downTo 0) {
+                        if (i == 6 && this.rows[r].row[i] == '@') {
+                            false
+                        }
+
+                        if (i < 6 && this.rows[r].row[i] == '@' && this.rows[r].row[i + 1] == '#') {
+                            false
+                        }
+                    }
                 }
-                false
+
+                // execute the shift
+                mergeRows.forEach { r->
+                    for (i in 6 downTo 0) {
+                        if (this.rows[r].row[i] == '@') {
+                            var str = this.rows[r].row.toCharArray()
+                            str[i] = '.'
+                            str[i + 1] = '@'
+                            this.rows[r].row = String(str)
+                        }
+                    }
+                }
+                true
             }
             else -> false
         }
@@ -177,6 +224,7 @@ fun main() {
     if (Chamber.mergeDown()) {
         Chamber.restRows()
     }
+    Chamber.mergeShift('<') // TODO: this doesn't collision detect properly
     Chamber.getRows().forEach { println("${Chamber.getRows().indexOf(it)}:\t$it") }
 
 //    var shiftIndex = 0
