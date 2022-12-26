@@ -21,7 +21,7 @@ private class Rock(private val rows: Array<Row>) {
                     for (i in rows.indices) {
                         rows[i].row = rows[i].row.drop(1) + '.'
                     }
-                    true
+                    return true
                 }
 
                 false
@@ -31,7 +31,7 @@ private class Rock(private val rows: Array<Row>) {
                     for (i in rows.indices) {
                         rows[i].row = '.' + rows[i].row.dropLast(1)
                     }
-                    true
+                    return true
                 }
 
                 false
@@ -145,7 +145,7 @@ private object Chamber {
                 mergeRows.forEach { r->
                     for (i in 0 until 7) {
                         if (this.rows[r].row[i] == '@') {
-                            var str = this.rows[r].row.toCharArray()
+                            val str = this.rows[r].row.toCharArray()
                             str[i] = '.'
                             str[i - 1] = '@'
                             this.rows[r].row = String(str)
@@ -172,7 +172,7 @@ private object Chamber {
                 mergeRows.forEach { r->
                     for (i in 6 downTo 0) {
                         if (this.rows[r].row[i] == '@') {
-                            var str = this.rows[r].row.toCharArray()
+                            val str = this.rows[r].row.toCharArray()
                             str[i] = '.'
                             str[i + 1] = '@'
                             this.rows[r].row = String(str)
@@ -259,16 +259,16 @@ fun main() {
 //    Chamber.getRows().forEach { println("${Chamber.getRows().indexOf(it)}:\t$it") }
 
     var shiftIndex = 0
-    for (rockNum in 1..10) {
+    for (rockNum in 1..22) { // TODO: 1..21 is correct (37) but 1..22 is wrong (33). Somehow rocks are vanishing?
 //        Chamber.addRow(Row(), Row(), Row())
         Chamber.spawnNewRows()
-        var rock = generateRock((rockNum - 1) % 5)
+        val rock = generateRock((rockNum - 1) % 5)
 
         var atRest = false
         while (!atRest) {
 //            println("Rock: $rockNum, Type: ${(rockNum - 1) % 5}, Shift: $shiftIndex, Dir: ${input[shiftIndex]}")
-            rock.print()
-            Chamber.print()
+//            rock.print()
+//            Chamber.print()
 //            readln()
 
 //            println("\tJet of gas pushes rock ${input[shiftIndex]}")
@@ -330,8 +330,8 @@ fun main() {
                 }
             }
         }
-//        println("After rock $rockNum:")
-//        Chamber.print()
+        println("After rock $rockNum:")
+        Chamber.print()
 //        readln()
     }
 
