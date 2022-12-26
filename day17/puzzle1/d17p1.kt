@@ -47,12 +47,26 @@ private class Rock(private val rows: Array<Row>) {
     fun getBottomRow(): Row {
         return rows.last()
     }
+
+    fun print() {
+        rows.forEach { println("|${it}|") }
+    }
 }
 
 private object Chamber {
     private val rows: ArrayDeque<Row> = ArrayDeque()
 
     private var mergeRows = intArrayOf()
+
+    fun spawnNewRows() {
+        if (rows.isNotEmpty()) {
+            while (rows.first().isEmpty()) {
+                rows.removeFirst()
+            }
+        }
+
+        this.addRow(Row(), Row(), Row())
+    }
 
     fun mergeRock(rock: Rock) {
         mergeRows = intArrayOf()
@@ -67,6 +81,10 @@ private object Chamber {
     }
 
     fun mergeDown(): Boolean {
+
+        if (mergeRows[0] == rows.lastIndex) {
+            return true
+        }
 
         for (i in 0 until 7) {
             if (this.rows[mergeRows[0]].row[i] == '@' && this.rows[mergeRows[0] + 1].row[i] != '.') {
@@ -88,15 +106,19 @@ private object Chamber {
             }
         }
 
-        for (i in mergeRows.indices) {
-            mergeRows[i]++
-        }
-
-        for (i in 0 until 7) {
-            if (this.rows[mergeRows[0]].row[i] == '@' && this.rows[mergeRows[0] + 1].row[i] != '.') {
-                return true
+        mergeRows = intArrayOf()
+        for (i in rows.indices) {
+            if (rows[i].row.contains('@')) {
+                mergeRows += i
             }
         }
+        mergeRows.sortDescending()
+
+//        for (i in 0 until 7) {
+//            if (this.rows[mergeRows[0]].row[i] == '@' && this.rows[mergeRows[0] + 1].row[i] != '.') {
+//                return true
+//            }
+//        }
 
         return false
     }
@@ -238,11 +260,18 @@ fun main() {
 
     var shiftIndex = 0
     for (rockNum in 1..10) {
-        Chamber.addRow(Row(), Row(), Row())
+//        Chamber.addRow(Row(), Row(), Row())
+        Chamber.spawnNewRows()
         var rock = generateRock((rockNum - 1) % 5)
 
         var atRest = false
         while (!atRest) {
+//            println("Rock: $rockNum, Type: ${(rockNum - 1) % 5}, Shift: $shiftIndex, Dir: ${input[shiftIndex]}")
+            rock.print()
+            Chamber.print()
+//            readln()
+
+//            println("\tJet of gas pushes rock ${input[shiftIndex]}")
             rock.shift(input[shiftIndex])
 
             shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
@@ -251,7 +280,9 @@ fun main() {
             // check if row below is empty, if so remove that row
             // if not check if the rock will rest on it (i.e. collision)
             // if so it comes to rest, if not merge them somehow
+//            println("\tRock falls 1 unit")
             if (Chamber.getRows().isEmpty()) { // if at floor
+//                println("\tRock comes to rest")
                 Chamber.addRow(*rock.getRows())
                 atRest = true
             } else if (Chamber.getTopRow().isEmpty()) { // empty rows to "drop into"
@@ -259,6 +290,7 @@ fun main() {
             } else {
                 for (i in 0 until 7) { // check if it will immediately come to rest
                     if (rock.getBottomRow().row[i] == '@' && Chamber.getTopRow().row[i] == '#') {
+//                        println("\tRock comes to rest")
                         Chamber.addRow(*rock.getRows())
                         atRest = true
                         break
@@ -266,12 +298,14 @@ fun main() {
                 }
 
                 if (!atRest) {
+//                    println("\tMerge...")
                     // 1. add rock to chamber
                     Chamber.mergeRock(rock)
                     // 2. do an initial merge down
                     // 3. check if we are able to rest
                     // 4. if yes, set flag and convert
                     if (Chamber.mergeDown()) {
+//                        println("\tRock comes to rest [a]")
                         atRest = true
                         Chamber.restRows()
                     }
@@ -282,19 +316,23 @@ fun main() {
                     //    d. if yes, set flag and convert; break loop(s)
                     //    e. if no then we repeat the procedure
                     while (!atRest) {
+//                        println("\tA jet of air pushes rock ${input[shiftIndex]}")
                         Chamber.mergeShift(input[shiftIndex])
                         shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
+//                        println("\tRock falls 1 unit")
                         if (Chamber.mergeDown()) {
+//                            println("\tRock comes to rest [b]")
                             atRest = true
                             Chamber.restRows()
                         }
+//                        Chamber.print()
                     }
                 }
             }
         }
-        println("After rock $rockNum:")
-        Chamber.print()
-        readln()
+//        println("After rock $rockNum:")
+//        Chamber.print()
+//        readln()
     }
 
 //    Chamber.getRows().forEach { println(it) } // iterates top to bottom
