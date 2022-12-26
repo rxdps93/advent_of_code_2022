@@ -92,6 +92,12 @@ private object Chamber {
             mergeRows[i]++
         }
 
+        for (i in 0 until 7) {
+            if (this.rows[mergeRows[0]].row[i] == '@' && this.rows[mergeRows[0] + 1].row[i] != '.') {
+                return true
+            }
+        }
+
         return false
     }
 
@@ -104,11 +110,11 @@ private object Chamber {
                 mergeRows.forEach { r->
                     for (i in 0 until 7) {
                         if (i == 0 && this.rows[r].row[i] == '@') {
-                            false
+                            return false
                         }
 
                         if (i > 0 && this.rows[r].row[i] == '@' && this.rows[r].row[i - 1] == '#') {
-                            false
+                            return false
                         }
                     }
                 }
@@ -131,11 +137,11 @@ private object Chamber {
                 mergeRows.forEach { r->
                     for (i in 6 downTo 0) {
                         if (i == 6 && this.rows[r].row[i] == '@') {
-                            false
+                            return false
                         }
 
                         if (i < 6 && this.rows[r].row[i] == '@' && this.rows[r].row[i + 1] == '#') {
-                            false
+                            return false
                         }
                     }
                 }
@@ -189,6 +195,10 @@ private object Chamber {
         return rows
     }
 
+    fun print() {
+        this.getRows().forEach { println("|${it}|") }
+        println("+-------+\n")
+    }
 }
 
 private fun generateRock(type: Int): Rock {
@@ -215,65 +225,79 @@ fun main() {
 //    Chamber.addRow(*test.getRows())
 //    Chamber.getRows().forEach { println(it) } // iterates top to bottom
 
-    Chamber.addRow(*generateRock(0).getRows())
-    Chamber.addRow(*generateRock(1).getRows())
-    var test = generateRock(4)
-    test.shift('>')
-    test.shift('>')
-    Chamber.mergeRock(test)
-    if (Chamber.mergeDown()) {
-        Chamber.restRows()
-    }
-    Chamber.mergeShift('<') // TODO: this doesn't collision detect properly
-    Chamber.getRows().forEach { println("${Chamber.getRows().indexOf(it)}:\t$it") }
+//    Chamber.addRow(*generateRock(0).getRows())
+//    Chamber.addRow(*generateRock(1).getRows())
+//    var test = generateRock(4)
+//    test.shift('>')
+//    test.shift('>')
+//    test.shift('>')
+//    Chamber.mergeRock(test)
+//    while (!Chamber.mergeDown());
+//    Chamber.restRows()
+//    Chamber.getRows().forEach { println("${Chamber.getRows().indexOf(it)}:\t$it") }
 
-//    var shiftIndex = 0
-//    for (rockNum in 1 until 4) {
-//        Chamber.addRow(Row(), Row(), Row())
-//        var rock = generateRock((rockNum - 1) % 5)
-//
-//        var atRest = false
-//        while (!atRest) {
-//            rock.shift(input[shiftIndex])
-//
-//            shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
-//            // rock drop step
-//            // if no rows below, it comes to rest
-//            // check if row below is empty, if so remove that row
-//            // if not check if the rock will rest on it (i.e. collision)
-//            // if so it comes to rest, if not merge them somehow
-//            if (Chamber.getRows().isEmpty()) { // if at floor
-//                Chamber.addRow(*rock.getRows())
-//                atRest = true
-//            } else if (Chamber.getTopRow().isEmpty()) { // empty rows to "drop into"
-//                Chamber.removeTopRow()
-//            } else {
-//                for (i in 0 until 7) { // check if it will immediately come to rest
-//                    if (rock.getBottomRow().row[i] == '@' && Chamber.getTopRow().row[i] == '#') {
-//                        Chamber.addRow(*rock.getRows())
-//                        atRest = true
-//                        break
-//                    }
-//                }
-//
-//                if (!atRest) {
-//                    // 1. add rock to chamber
-//                    Chamber.mergeRock(rock)
-//                    // 2. do an initial merge down
-//                    Chamber.mergeDown()
-//                    // 3. check if we are able to rest
-//                    // 4. if yes, set flag and convert
-//                    // 5. if no, loop through the following procedure:
-//                    //    a. merge shift
-//                    //    b. merge down
-//                    //    c. check if we are able to rest
-//                    //    d. if yes, set flag and convert; break loop(s)
-//                    //    e. if no the we repeat the procedure
-//                }
-//            }
-//        }
-//    }
+    var shiftIndex = 0
+    for (rockNum in 1..10) {
+        Chamber.addRow(Row(), Row(), Row())
+        var rock = generateRock((rockNum - 1) % 5)
+
+        var atRest = false
+        while (!atRest) {
+            rock.shift(input[shiftIndex])
+
+            shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
+            // rock drop step
+            // if no rows below, it comes to rest
+            // check if row below is empty, if so remove that row
+            // if not check if the rock will rest on it (i.e. collision)
+            // if so it comes to rest, if not merge them somehow
+            if (Chamber.getRows().isEmpty()) { // if at floor
+                Chamber.addRow(*rock.getRows())
+                atRest = true
+            } else if (Chamber.getTopRow().isEmpty()) { // empty rows to "drop into"
+                Chamber.removeTopRow()
+            } else {
+                for (i in 0 until 7) { // check if it will immediately come to rest
+                    if (rock.getBottomRow().row[i] == '@' && Chamber.getTopRow().row[i] == '#') {
+                        Chamber.addRow(*rock.getRows())
+                        atRest = true
+                        break
+                    }
+                }
+
+                if (!atRest) {
+                    // 1. add rock to chamber
+                    Chamber.mergeRock(rock)
+                    // 2. do an initial merge down
+                    // 3. check if we are able to rest
+                    // 4. if yes, set flag and convert
+                    if (Chamber.mergeDown()) {
+                        atRest = true
+                        Chamber.restRows()
+                    }
+                    // 5. if no, loop through the following procedure:
+                    //    a. merge shift
+                    //    b. merge down
+                    //    c. check if we are able to rest
+                    //    d. if yes, set flag and convert; break loop(s)
+                    //    e. if no then we repeat the procedure
+                    while (!atRest) {
+                        Chamber.mergeShift(input[shiftIndex])
+                        shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
+                        if (Chamber.mergeDown()) {
+                            atRest = true
+                            Chamber.restRows()
+                        }
+                    }
+                }
+            }
+        }
+        println("After rock $rockNum:")
+        Chamber.print()
+        readln()
+    }
 
 //    Chamber.getRows().forEach { println(it) } // iterates top to bottom
-//    println("The tower of rocks is ${Chamber.getRows().sumOf { if (it.row.contains('#')) 1L else 0L }} units tall.")
+//    Chamber.print()
+    println("The tower of rocks is ${Chamber.getRows().sumOf { if (it.row.contains('#')) 1L else 0L }} units tall.")
 }
