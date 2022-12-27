@@ -1,6 +1,7 @@
 package day17.puzzle2
 
 import java.io.File
+import java.time.Clock
 
 private class Row(var row: String = ".......") {
 
@@ -86,12 +87,6 @@ private object Chamber {
             return true
         }
 
-//        for (i in 0 until 7) {
-//            if (this.rows[mergeRows[0]].row[i] == '@' && this.rows[mergeRows[0] + 1].row[i] != '.') {
-//                return true
-//            }
-//        }
-
         mergeRows.forEach { r->
             for (i in 0 until 7) {
                 if (this.rows[r].row[i] == '@' && this.rows[r + 1].row[i] == '#') {
@@ -122,18 +117,11 @@ private object Chamber {
         }
         mergeRows.sortDescending()
 
-//        for (i in 0 until 7) {
-//            if (this.rows[mergeRows[0]].row[i] == '@' && this.rows[mergeRows[0] + 1].row[i] != '.') {
-//                return true
-//            }
-//        }
-
         return false
     }
 
     fun mergeShift(dir: Char): Boolean {
 
-        // first check if the merge can happen, then do it. separate loops.
         return when (dir) {
             '<' -> {
                 // verify we can shift
@@ -225,6 +213,10 @@ private object Chamber {
         return rows
     }
 
+    fun getHeight(): Long {
+        return this.rows.sumOf { if (it.row.contains('#')) 1L else 0L }
+    }
+
     fun print() {
         this.getRows().forEach { println("|${it}|") }
         println("+-------+\n")
@@ -243,129 +235,44 @@ private fun generateRock(type: Long): Rock {
 }
 
 fun main() {
-    val input = File("day17/input.txt").readLines()[0].toCharArray()
+    val input = File("day17/testInput.txt").readLines()[0].toCharArray()
 
-//    Chamber.addRow(Row(), Row(), Row()) // add floor
-//    Chamber.addRow(*generateRock(2).getRows())
-//    var test = generateRock(2)
-//    test.shift('<')
-//    test.shift('<')
-//    test.shift('<')
-//    Chamber.addRow(*test.getRows())
-//    Chamber.getRows().forEach { println(it) } // iterates top to bottom
-
-//    Chamber.addRow(*generateRock(0).getRows())
-//    Chamber.addRow(*generateRock(1).getRows())
-//    var test = generateRock(4)
-//    test.shift('>')
-//    test.shift('>')
-//    test.shift('>')
-//    Chamber.mergeRock(test)
-//    while (!Chamber.mergeDown());
-//    Chamber.restRows()
-//    Chamber.getRows().forEach { println("${Chamber.getRows().indexOf(it)}:\t$it") }
-
-//    var limit = 1000000000000L
-//    val seen: HashMap<String, Int> = hashMapOf()
-    val seen: MutableList<String> = mutableListOf()
-    var limit = 2022L
+    var h = 0L
+    var lh = 0L
+    var lr = 0L
     var shiftIndex = 0
-    var str = ""
-    for (rockNum in 1..limit) {
+    var rockLimit = 1000000000000L
 
+    val begin = System.nanoTime()
+    for (rockNum in 1..10000L) {
         Chamber.spawnNewRows()
         val rock = generateRock((rockNum - 1) % 5)
+        Chamber.mergeRock(rock)
 
         var atRest = false
         while (!atRest) {
-//            println("Rock: $rockNum, Type: ${(rockNum - 1) % 5}, Shift: $shiftIndex, Dir: ${input[shiftIndex]}")
-//            rock.print()
-//            Chamber.print()
-//            if (rockNum > 20)
-//                readln()
+            Chamber.mergeShift(input[shiftIndex])
 
-//            println("\tJet of gas pushes rock ${input[shiftIndex]}")
-            str = "Rock: ${(rockNum - 1) % 5}; Shift: ${input[shiftIndex]}; ShiftIndex: $shiftIndex"
-            seen.add(str)
-//            if (seen.contains(str)) {
-//                seen[str] = seen[str]!! + 1
-//            } else {
-//                seen[str] = 0
-//            }
-            rock.shift(input[shiftIndex])
-            shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
-            // rock drop step
-            // if no rows below, it comes to rest
-            // check if row below is empty, if so remove that row
-            // if not check if the rock will rest on it (i.e. collision)
-            // if so it comes to rest, if not merge them somehow
-//            println("\tRock falls 1 unit")
-            if (Chamber.getRows().isEmpty()) { // if at floor
-//                println("\tRock comes to rest")
-                Chamber.addRow(*rock.getRows())
-                atRest = true
-            } else if (Chamber.getTopRow().isEmpty()) { // empty rows to "drop into"
-                Chamber.removeTopRow()
+            shiftIndex = if (shiftIndex == input.lastIndex) {
+                h = Chamber.getHeight()
+                println("Rock: $rockNum; Delta: ${rockNum - lr} Rock Type: ${(rockNum - 1) % 5}; Height: $h; Delta: ${h - lh}")
+                lh = h
+                lr = rockNum
+                0
             } else {
-                for (i in 0 until 7) { // check if it will immediately come to rest
-                    if (rock.getBottomRow().row[i] == '@' && Chamber.getTopRow().row[i] == '#') {
-//                        println("\tRock comes to rest")
-                        Chamber.addRow(*rock.getRows())
-                        atRest = true
-                        break
-                    }
-                }
+                shiftIndex + 1
+            }
 
-                if (!atRest) {
-//                    println("\tMerge...")
-                    // 1. add rock to chamber
-                    Chamber.mergeRock(rock)
-                    // 2. do an initial merge down
-                    // 3. check if we are able to rest
-                    // 4. if yes, set flag and convert
-                    if (Chamber.mergeDown()) {
-//                        println("\tRock comes to rest [a]")
-                        atRest = true
-                        Chamber.restRows()
-                    }
-//                    Chamber.print()
-
-                    // 5. if no, loop through the following procedure:
-                    //    a. merge shift
-                    //    b. merge down
-                    //    c. check if we are able to rest
-                    //    d. if yes, set flag and convert; break loop(s)
-                    //    e. if no then we repeat the procedure
-                    while (!atRest) {
-//                        println("\tA jet of air pushes rock ${input[shiftIndex]}")
-                        str = "Rock: ${(rockNum - 1) % 5}; Shift: ${input[shiftIndex]}; ShiftIndex: $shiftIndex"
-                        seen.add(str)
-                        Chamber.mergeShift(input[shiftIndex])
-                        shiftIndex = if (shiftIndex == input.lastIndex) 0 else shiftIndex + 1
-//                        println("\tRock falls 1 unit")
-                        if (Chamber.mergeDown()) {
-//                            println("\tRock comes to rest [b]")
-                            atRest = true
-                            Chamber.restRows()
-                        }
-//                        Chamber.print()
-                    }
-                }
+            if (Chamber.mergeDown()) {
+                atRest = true
+                Chamber.restRows()
             }
         }
-//        println("After rock $rockNum:")
-//        Chamber.print()
-//        if (rockNum > 20)
-//            readln()
     }
+    val end = System.nanoTime()
 
-//    Chamber.getRows().forEach { println(it) } // iterates top to bottom
-    Chamber.print()
-//    seen.toSortedMap().forEach {
-//        println("${it.key} was seen ${it.value} time(s)")
-//    }
-//    for (i in seen.indices) {
-//        println("$i: ${seen[i]}")
-//    }
-    println("The tower of rocks is ${Chamber.getRows().sumOf { if (it.row.contains('#')) 1L else 0L }} units tall.")
+//    Chamber.print()
+    println("$h")
+    println("The tower of rocks is ${Chamber.getHeight()} units tall.")
+    println("This ran in ${(end - begin) / 1000000} ms")
 }
