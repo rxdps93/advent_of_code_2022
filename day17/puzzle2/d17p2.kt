@@ -1,7 +1,6 @@
 package day17.puzzle2
 
 import java.io.File
-import java.time.Clock
 
 private class Row(var row: String = ".......") {
 
@@ -15,49 +14,15 @@ private class Row(var row: String = ".......") {
 
 private class Rock(private val rows: Array<Row>) {
 
-    fun shift(dir: Char): Boolean {
-        return when (dir) {
-            '<' -> {
-                if (rows.sumOf { it.row.first() - '.' } == 0) {
-                    for (i in rows.indices) {
-                        rows[i].row = rows[i].row.drop(1) + '.'
-                    }
-                    return true
-                }
-
-                false
-            }
-            '>' -> {
-                if (rows.sumOf { it.row.last() - '.' } == 0) {
-                    for (i in rows.indices) {
-                        rows[i].row = '.' + rows[i].row.dropLast(1)
-                    }
-                    return true
-                }
-
-                false
-            }
-            else -> false
-        }
-    }
-
     fun getRows(): Array<Row> {
         return rows.reversedArray()
-    }
-
-    fun getBottomRow(): Row {
-        return rows.last()
-    }
-
-    fun print() {
-        rows.forEach { println("|${it}|") }
     }
 }
 
 private object Chamber {
     private val rows: ArrayDeque<Row> = ArrayDeque()
-
     private var mergeRows = intArrayOf()
+    var skipRows = 0L
 
     fun spawnNewRows() {
         if (rows.isNotEmpty()) {
@@ -201,20 +166,16 @@ private object Chamber {
         }
     }
 
-    fun removeTopRow() {
-        rows.removeFirst()
-    }
-
-    fun getTopRow(): Row {
-        return rows.first()
-    }
-
     fun getRows(): ArrayDeque<Row> {
         return rows
     }
 
     fun getHeight(): Long {
         return this.rows.sumOf { if (it.row.contains('#')) 1L else 0L }
+    }
+
+    fun getHeightWithSkips(): Long {
+        return this.getHeight() + this.skipRows
     }
 
     fun print() {
@@ -235,16 +196,17 @@ private fun generateRock(type: Long): Rock {
 }
 
 fun main() {
-    val input = File("day17/testInput.txt").readLines()[0].toCharArray()
+    val input = File("day17/input.txt").readLines()[0].toCharArray()
 
-    var h = 0L
+    var h: Long
     var lh = 0L
     var lr = 0L
     var shiftIndex = 0
     var rockLimit = 1000000000000L
+    var cycles = hashSetOf<Triple<Long, Long, Long>>()
 
-    val begin = System.nanoTime()
-    for (rockNum in 1..10000L) {
+    var rockNum = 1L
+    while (rockNum <= rockLimit) {
         Chamber.spawnNewRows()
         val rock = generateRock((rockNum - 1) % 5)
         Chamber.mergeRock(rock)
@@ -254,10 +216,20 @@ fun main() {
             Chamber.mergeShift(input[shiftIndex])
 
             shiftIndex = if (shiftIndex == input.lastIndex) {
-                h = Chamber.getHeight()
-                println("Rock: $rockNum; Delta: ${rockNum - lr} Rock Type: ${(rockNum - 1) % 5}; Height: $h; Delta: ${h - lh}")
+                h = Chamber.getHeightWithSkips()
+                var cycle = Triple(rockNum - lr, (rockNum - 1) % 5, h - lh)
                 lh = h
                 lr = rockNum
+
+                if (!cycles.add(cycle)) {
+
+                    var iter = (rockLimit - rockNum) / cycle.first
+                    rockNum += (iter * cycle.first)
+                    Chamber.skipRows += cycle.third * iter
+                    lh = Chamber.getHeightWithSkips()
+                    lr = rockNum
+                }
+
                 0
             } else {
                 shiftIndex + 1
@@ -268,11 +240,8 @@ fun main() {
                 Chamber.restRows()
             }
         }
+        rockNum++
     }
-    val end = System.nanoTime()
 
-//    Chamber.print()
-    println("$h")
-    println("The tower of rocks is ${Chamber.getHeight()} units tall.")
-    println("This ran in ${(end - begin) / 1000000} ms")
+    println("The tower of rocks is ${Chamber.getHeightWithSkips()} units tall.")
 }
