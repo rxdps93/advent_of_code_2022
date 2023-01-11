@@ -4,9 +4,14 @@ import java.io.File
 import kotlin.system.measureNanoTime
 
 private data class State(
-        var minutes: Int = 24,
+        var minutes: Int = 32,
         var oreBots: Int = 1, var clayBots: Int = 0, var obsBots: Int = 0, var geoBots: Int = 0,
-        var ore: Int = 0, var clay: Int = 0, var obsidian: Int = 0, var geodes: Int = 0)
+        var ore: Int = 0, var clay: Int = 0, var obsidian: Int = 0, var geodes: Int = 0) {
+
+    fun currentPotentialGeodes(): Int {
+        return this.geodes + (this.minutes * this.geoBots)
+    }
+}
 
 private class Blueprint(val id: Int, var best: Int,
                 val oreBotCost: Int, val clayBotCost: Int,
@@ -30,11 +35,15 @@ private class Blueprint(val id: Int, var best: Int,
 
             visited.add(state)
 
+            if (state.geodes > this.best) {
+                this.best = state.geodes
+                this.bestState = state.copy()
+            }
+            else if (state.currentPotentialGeodes() < this.best) {
+                continue
+            }
+
             if (state.minutes <= 0) {
-                if (state.geodes > this.best) {
-                    this.best = state.geodes
-                    this.bestState = state.copy()
-                }
                 continue
             }
 
@@ -120,7 +129,7 @@ private class Blueprint(val id: Int, var best: Int,
 }
 
 fun main() {
-    val input = File("day19/testInput.txt").readLines().take(3).map {  line ->
+    val input = File("day19/input.txt").readLines().take(3).map {  line ->
         val tokens = Regex("Blueprint ([0-9]*): Each ore robot costs ([0-9]*) ore. Each clay robot costs ([0-9]*) ore. Each obsidian robot costs ([0-9]*) ore and ([0-9]*) clay. Each geode robot costs ([0-9]*) ore and ([0-9]*) obsidian.").find(line)!!.groupValues
         Blueprint(tokens[1].toInt(), Int.MIN_VALUE,
                 tokens[2].toInt(), tokens[3].toInt(),
@@ -129,10 +138,7 @@ fun main() {
 
     var geodes = 1L
     input.forEach {
-        var begin = System.currentTimeMillis()
         it.simulate()
-        var end = System.currentTimeMillis()
-        println("Blueprint ${it.id}: ${it.best} geodes in ${end - begin}ms")
         geodes *= it.best
     }
 
