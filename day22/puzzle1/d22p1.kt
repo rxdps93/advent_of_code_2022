@@ -16,18 +16,20 @@ fun main() {
     File("day22/input.txt").forEachLine { line ->
         if (!line.contains('.') && !line.contains('#')) {
             Regex("([0-9]*)([A-Z]*)").findAll(line).forEach { match->
-                if (match.groupValues.size == 3) {
-                    if (!match.groupValues.contains("")) {
-                        instructions.add(match.groupValues[1])
+
+                if (match.groupValues[1] != "") {
+                    instructions.add(match.groupValues[1])
+
+                    if (match.groupValues[2] != "") {
                         instructions.add(match.groupValues[2])
                     }
                 }
             }
         } else {
             line.forEachIndexed { index, c ->
-                tiles[Pair(row, index + 1)] = Tile(row, index + 1, c)
 
                 if (c != ' ') {
+                    tiles[Pair(row, index + 1)] = Tile(row, index + 1, c)
 
                     if (c == '.' && currCol == -1) {
                         currCol = index + 1
@@ -44,8 +46,6 @@ fun main() {
             row++
         }
     }
-
-    println("You are starting at ($currRow, $currCol)")
 
     var facing = 0
     var colStep = 1
@@ -64,7 +64,7 @@ fun main() {
             // Walk
             for (step in 1..instr.toInt()) {
                 var next = tiles[Pair(currRow + rowStep, currCol + colStep)]
-                if (next == null || next.type == ' ') {
+                if (next == null) {
                     // wrap around
                     next = when (facing) {
                         0 -> { tiles[Pair(currRow, rowBounds[currRow]!!.first)] }
@@ -75,7 +75,7 @@ fun main() {
                     }
 
                     if (next == null) {
-                        println("oops: $facing: ($currRow, $currCol)")
+                        println("\toops: $facing: ($currRow, $currCol)")
                     } else {
                         if (next.type == '.') {
                             currRow = next.row
@@ -96,5 +96,5 @@ fun main() {
         }
     }
 
-    println("You ended up on coordinates ($currRow, $currCol), the password is ${(1000 * currRow) + (4 * currCol) + facing}")
+    println("You ended up on coordinates ($currRow, $currCol); the password is ${(1000 * currRow) + (4 * currCol) + facing}")
 }
