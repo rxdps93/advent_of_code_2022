@@ -7,11 +7,11 @@ import kotlin.math.pow
 interface Monkey {
     val name: String
 
-    fun yell(): Long
+    fun yell(): Double
 }
 
-class NumberMonkey(override val name: String = "", var number: Long = 0L) : Monkey {
-    override fun yell(): Long {
+class NumberMonkey(override val name: String = "", var number: Double = 0.0) : Monkey {
+    override fun yell(): Double {
         return this.number
     }
 
@@ -24,10 +24,10 @@ class OperationMonkey(override val name: String = "",
 
     var left: Monkey = NumberMonkey()
     var right: Monkey = NumberMonkey()
-    var leftVal = 0L
-    var rightVal = 0L
+    var leftVal = 0.0
+    var rightVal = 0.0
 
-    override fun yell(): Long {
+    override fun yell(): Double {
         return when (operator) {
             '+' -> {
                 left.yell() + right.yell()
@@ -46,7 +46,7 @@ class OperationMonkey(override val name: String = "",
                 rightVal = right.yell()
                 leftVal - rightVal
             }
-            else -> -1L
+            else -> -1.0
         }
     }
 
@@ -57,7 +57,7 @@ fun main() {
     File("day21/input.txt").forEachLine { line ->
         val tokens = line.replace(":", "").split(" ")
         if (tokens.size == 2) {
-            monkeys[tokens[0]] = NumberMonkey(tokens[0], tokens[1].toLong())
+            monkeys[tokens[0]] = NumberMonkey(tokens[0], tokens[1].toDouble())
         } else {
             monkeys[tokens[0]] = OperationMonkey(tokens[0], tokens[1],
                     if (tokens[0] == "root") '=' else tokens[2][0], tokens[3])
@@ -74,19 +74,17 @@ fun main() {
     val humn = monkeys["humn"]!! as NumberMonkey
     root.yell()
 
-    var step = 10.0.pow(10).toLong()
+    var step = 10.0.pow(10.0)
     while (root.leftVal != root.rightVal) {
         val diff = root.leftVal - root.rightVal
         humn.number += step
         root.yell()
 
         if (abs(root.leftVal - root.rightVal) > abs(diff)) {
-            step /= 10L
+            step /= 10.0
             step = -step
         }
     }
 
-    println("${root.leftVal} <--> ${root.rightVal}")
-
-    println("The number you must yell is ${humn.yell()}")
+    println("The number you must yell is ${humn.yell().toLong()}")
 }
