@@ -1,4 +1,4 @@
-package day23.puzzle1
+package day23.puzzle2
 
 import java.io.File
 
@@ -92,7 +92,9 @@ fun main() {
 
     val order = mutableListOf(Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST)
     var toMove: HashMap<Pair<Int, Int>, Pair<Int, Int>>
-    for (round in 1..10) {
+    var round = 0
+    do {
+        round++
         toMove = hashMapOf()
         // pad
         padGrove(grove)
@@ -137,18 +139,15 @@ fun main() {
         }
 
         // move
-        if (toMove.isEmpty()) {
-            trimGrove(grove)
-            break
-        } else {
-            toMove.forEach { move ->
-                grove[move.key.first][move.key.second] = '.'
-                grove[move.value.first][move.value.second] = '#'
-            }
+        toMove.forEach { move ->
+            grove[move.key.first][move.key.second] = '.'
+            grove[move.value.first][move.value.second] = '#'
         }
+
 
         // trim
         trimGrove(grove)
-    }
-    println("The number of empty ground tiles is ${grove.sumOf { it.sumOf { c -> if (c == '.') 1L else 0L } }}")
+    } while (toMove.isNotEmpty())
+
+    println("The first round where no Elf moved was round $round")
 }
