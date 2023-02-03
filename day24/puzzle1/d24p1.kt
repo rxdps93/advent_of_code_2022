@@ -46,12 +46,6 @@ data class Blizzard(val id: Int, val type: Char, var coords: Pair<Int, Int>) {
 
 class Valley(var time: Int = 0) {
 
-    var rows = 0
-    var cols = 0
-
-    var start = Pair(-1, -1)
-    var end = Pair(-1, -1)
-
     val blizzards = mutableListOf<Blizzard>()
     var expedition = start
 
@@ -59,15 +53,17 @@ class Valley(var time: Int = 0) {
 
         if (target == end) {
             return true
+        } else if (target == start) {
+            return false
         }
 
         this.blizzards.forEach { if (it.coords == target) { return false } }
 
-        if (target.first <= 0 || target.first >= rows - 1) {
+        if (target.first <= 0 || target.first >= size.first - 1) {
             return false
         }
 
-        if (target.second <= 0 || target.second >= cols - 1) {
+        if (target.second <= 0 || target.second >= size.second - 1) {
             return false
         }
 
@@ -75,7 +71,7 @@ class Valley(var time: Int = 0) {
     }
 
     fun print() {
-        val out = MutableList(rows) { CharArray(cols) { '.' } }
+        val out = MutableList(size.first) { CharArray(size.second) { '.' } }
 
         out.first().fill('#')
         out.last().fill('#')
@@ -126,7 +122,51 @@ class Valley(var time: Int = 0) {
 
     companion object {
 
-        fun nextPossibleStates(current: Valley, blizzardState: MutableList<Blizzard>?): List<Valley> {
+        var size = Pair(-1, -1)
+        var start = Pair(-1, -1)
+        var end = Pair(-1, -1)
+        var states = hashMapOf<Int, List<Blizzard>>()
+
+        fun stateAtTime(time: Int): List<Blizzard>? {
+            return states[time % states.size]
+        }
+
+        fun nextBlizzardState(old: List<Blizzard>): List<Blizzard> {
+            val new = mutableListOf<Blizzard>()
+            old.forEach { new.add(Blizzard(it.id, it.type, it.coords)) }
+            new.forEach { it.move(size)  }
+            return new.sortedBy { it.id }
+        }
+
+        fun printBlizzardState(state: List<Blizzard>) {
+            val out = MutableList(size.first) { CharArray(size.second) { '.' } }
+
+            out.first().fill('#')
+            out.last().fill('#')
+            out.forEach { it[0] = '#'; it[it.lastIndex] = '#' }
+            out[start.first][start.second] = '.'
+            out[end.first][end.second] = '.'
+
+            state.forEach {
+                val r = it.coords.first
+                val c = it.coords.second
+                out[r][c] =
+                        if (out[r][c] == '.') {
+                            it.getSymbol()
+                        } else {
+                            val spot = out[r][c].digitToIntOrNull()
+                            if (spot == null) {
+                                '2'
+                            } else {
+                                if (spot < 9) (spot + 1).digitToChar() else 'X'
+                            }
+                        }
+            }
+
+            out.forEach { println(String(it)) }
+        }
+
+        fun nextPossibleStates(current: Valley, blizzardState: MutableList<Blizzard>? = null): List<Valley> {
             val next = from(current)
             next.time++
             val moves = mutableListOf<Valley>()
@@ -134,7 +174,7 @@ class Valley(var time: Int = 0) {
             // move blizzards
             if (blizzardState == null) {
                 next.blizzards.forEach { blizzard ->
-                    blizzard.move(Pair(next.rows, next.cols))
+                    blizzard.move(size)
                 }
             } else {
 //                println("found")
@@ -186,12 +226,7 @@ class Valley(var time: Int = 0) {
 
         fun from(old: Valley): Valley {
             val new = Valley(old.time)
-            new.rows = old.rows
-            new.cols = old.cols
-            new.start = old.start.copy()
-            new.end = old.end.copy()
             new.expedition = old.expedition.copy()
-
 
             old.blizzards.forEach { new.blizzards.add(Blizzard(it.id, it.type, it.coords.copy())) }
             return new
@@ -202,13 +237,11 @@ class Valley(var time: Int = 0) {
 fun main() {
     val input = File("day24/test.txt").readLines()
     val valley = Valley()
-    valley.start = Pair(0, input[0].indexOfFirst { it == '.' })
-    valley.end = Pair(input.lastIndex, input.last().indexOfFirst { it == '.' })
+    Valley.start = Pair(0, input[0].indexOfFirst { it == '.' })
+    Valley.end = Pair(input.lastIndex, input.last().indexOfFirst { it == '.' })
+    Valley.size = Pair(input.size, input[0].length)
 
-    valley.rows = input.size
-    valley.cols = input[0].length
-
-    valley.expedition = valley.start
+    valley.expedition = Valley.start
     var b = 0
     input.forEachIndexed { row, str ->
         str.forEachIndexed { col, c ->
@@ -219,31 +252,49 @@ fun main() {
         }
     }
 
-    val queue = ArrayDeque<Valley>()
-    val visited = mutableListOf<Valley>()
-    val blizzardStates = hashMapOf(Pair(0, valley.blizzards))
-    queue.addLast(valley)
     var time = 0
-    while (queue.isNotEmpty()) {
-        val current = queue.removeFirst()
+    Valley.states[time] = (valley.blizzards.sortedBy { it.id })
+    var current = valley.blizzards.sortedBy { it.id }
+    do {
+        val next = Valley.nextBlizzardState(current)
+        current = next
 
-        if (current.expedition == valley.end) {
-            time = current.time
+        if (!Valley.states.containsValue(current)) {
+            Valley.states[++time] = current
+        } else {
             break
         }
 
-        val nextStates = Valley.nextPossibleStates(current, blizzardStates[current.time + 1])
-        if (nextStates.isNotEmpty()) {
+    } while (true)
 
-            blizzardStates.putIfAbsent(current.time + 1, nextStates[0].blizzards)
-            nextStates.forEach {
-                if (!visited.contains(it)) {
-                    visited.add(it)
-                    queue.addLast(it)
-                }
-            }
-        }
-    }
 
-    println("The shortest path to the exit takes $time minutes.")
+//    val queue = ArrayDeque<Valley>()
+//    val visited = mutableListOf<Valley>()
+//    val blizzardStates = hashMapOf(Pair(0, valley.blizzards))
+//    queue.addLast(valley)
+//    var time = 0
+//    while (queue.isNotEmpty()) {
+//        val current = queue.removeFirst()
+//
+//        println(current.expedition)
+//
+//        if (current.expedition == valley.end) {
+//            time = current.time
+//            break
+//        }
+//
+//        val nextStates = Valley.nextPossibleStates(current, blizzardStates[current.time + 1])
+//        if (nextStates.isNotEmpty()) {
+//
+//            blizzardStates.putIfAbsent(current.time + 1, nextStates[0].blizzards)
+//            nextStates.forEach {
+//                if (!visited.contains(it)) {
+//                    visited.add(it)
+//                    queue.addLast(it)
+//                }
+//            }
+//        }
+//    }
+//
+//    println("The shortest path to the exit takes $time minutes.")
 }
