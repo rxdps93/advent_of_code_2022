@@ -74,7 +74,7 @@ I'm doing it in Kotlin.
   - [x] puzzle 1
   - [x] puzzle 2
 - [ ] Day 24
-  - [ ] puzzle 1
+  - [x] puzzle 1
   - [ ] puzzle 2
 - [ ] Day 25
   - [ ] puzzle 1

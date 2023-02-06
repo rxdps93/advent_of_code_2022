@@ -2,7 +2,7 @@ package day24.puzzle1
 
 import java.io.File
 
-data class Blizzard(val id: Int, val type: Char, var coords: Pair<Int, Int>) {
+data class Blizzard(val type: Char, var coords: Pair<Int, Int>) {
     fun move(size: Pair<Int, Int>): Boolean {
         coords = when (type) {
             '^' -> {
@@ -38,18 +38,13 @@ data class Blizzard(val id: Int, val type: Char, var coords: Pair<Int, Int>) {
 
         return true
     }
-
-    fun getSymbol(): Char {
-        return type
-    }
 }
 
 class Valley(var time: Int = 0) {
 
-    val blizzards = mutableListOf<Blizzard>()
     var expedition = start
 
-    fun canMoveTo(target: Pair<Int, Int>): Boolean {
+    fun canMoveto(target: Pair<Int, Int>): Boolean {
 
         if (target == end) {
             return true
@@ -57,7 +52,7 @@ class Valley(var time: Int = 0) {
             return false
         }
 
-        this.blizzards.forEach { if (it.coords == target) { return false } }
+        stateAtTime(this.time)!!.forEach { if (it.coords == target) { return false } }
 
         if (target.first <= 0 || target.first >= size.first - 1) {
             return false
@@ -79,12 +74,12 @@ class Valley(var time: Int = 0) {
         out[start.first][start.second] = '.'
         out[end.first][end.second] = '.'
 
-        blizzards.forEach {
+        stateAtTime(time)!!.forEach {
             val r = it.coords.first
             val c = it.coords.second
             out[r][c] =
                     if (out[r][c] == '.') {
-                it.getSymbol()
+                it.type
             } else {
                 val spot = out[r][c].digitToIntOrNull()
                 if (spot == null) {
@@ -97,27 +92,6 @@ class Valley(var time: Int = 0) {
         out[expedition.first][expedition.second] = 'E'
 
         out.forEach { println(String(it)) }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return if (other is Valley) {
-            var eq = (this.time == other.time) && (this.expedition == other.expedition)
-
-            val tbm = this.blizzards.associateBy { it.id }
-            val obm = other.blizzards.associateBy { it.id }
-
-            eq = eq && (tbm.size == obm.size) && (tbm.keys == obm.keys)
-
-            if (eq) {
-                for (i in tbm.keys) {
-                    eq = eq && (tbm[i]!!.coords == obm[i]!!.coords) && (tbm[i]!!.getSymbol() == tbm[i]!!.getSymbol())
-                }
-            }
-
-            eq
-        } else {
-            false
-        }
     }
 
     companion object {
@@ -133,9 +107,9 @@ class Valley(var time: Int = 0) {
 
         fun nextBlizzardState(old: List<Blizzard>): List<Blizzard> {
             val new = mutableListOf<Blizzard>()
-            old.forEach { new.add(Blizzard(it.id, it.type, it.coords)) }
+            old.forEach { new.add(Blizzard(it.type, it.coords)) }
             new.forEach { it.move(size)  }
-            return new.sortedBy { it.id }
+            return new
         }
 
         fun printBlizzardState(state: List<Blizzard>) {
@@ -152,7 +126,7 @@ class Valley(var time: Int = 0) {
                 val c = it.coords.second
                 out[r][c] =
                         if (out[r][c] == '.') {
-                            it.getSymbol()
+                            it.type
                         } else {
                             val spot = out[r][c].digitToIntOrNull()
                             if (spot == null) {
@@ -166,135 +140,106 @@ class Valley(var time: Int = 0) {
             out.forEach { println(String(it)) }
         }
 
-        fun nextPossibleStates(current: Valley, blizzardState: MutableList<Blizzard>? = null): List<Valley> {
+        fun determineMoves(current: Valley): List<Valley> {
+
             val next = from(current)
             next.time++
             val moves = mutableListOf<Valley>()
 
-            // move blizzards
-            if (blizzardState == null) {
-                next.blizzards.forEach { blizzard ->
-                    blizzard.move(size)
-                }
-            } else {
-//                println("found")
-                next.blizzards.clear()
-                blizzardState.forEach { next.blizzards.add(Blizzard(it.id, it.type, it.coords.copy())) }
+            // Can Move Right
+            if (next.canMoveto(Pair(next.expedition.first, next.expedition.second + 1))) {
+                moves.add(from(next, Pair(next.expedition.first, next.expedition.second + 1)))
             }
 
-            // handle expedition
-            // wait
-            if (next.canMoveTo(next.expedition)) {
-//                println("\twait")
+            // Can Move Down
+            if (next.canMoveto(Pair(next.expedition.first + 1, next.expedition.second))) {
+                moves.add(from(next, Pair(next.expedition.first + 1, next.expedition.second)))
+            }
+
+            // Can Move Up
+            if (next.canMoveto(Pair(next.expedition.first - 1, next.expedition.second))) {
+                moves.add(from(next, Pair(next.expedition.first - 1, next.expedition.second)))
+            }
+
+            // Can Move Left
+            if (next.canMoveto(Pair(next.expedition.first, next.expedition.second - 1))) {
+                moves.add(from(next, Pair(next.expedition.first, next.expedition.second - 1)))
+            }
+
+            // Can Wait
+            if (next.canMoveto(next.expedition)) {
                 moves.add(from(next))
-            }
-
-            // up
-            if (next.canMoveTo(Pair(next.expedition.first - 1, next.expedition.second))) {
-//                println("\tmove up")
-                val expNext = from(next)
-                expNext.expedition = Pair(next.expedition.first - 1, next.expedition.second)
-                moves.add(expNext)
-            }
-
-            // down
-            if (next.canMoveTo(Pair(next.expedition.first + 1, next.expedition.second))) {
-//                println("\tmove down")
-                val expNext = from(next)
-                expNext.expedition = Pair(next.expedition.first + 1, next.expedition.second)
-                moves.add(expNext)
-            }
-
-            // left
-            if (next.canMoveTo(Pair(next.expedition.first, next.expedition.second - 1))) {
-//                println("\tmove left")
-                val expNext = from(next)
-                expNext.expedition = Pair(next.expedition.first, next.expedition.second - 1)
-                moves.add(expNext)
-            }
-
-            // right
-            if (next.canMoveTo(Pair(next.expedition.first, next.expedition.second + 1))) {
-//                println("\tmove right")
-                val expNext = from(next)
-                expNext.expedition = Pair(next.expedition.first, next.expedition.second + 1)
-                moves.add(expNext)
             }
 
             return moves
         }
 
-        fun from(old: Valley): Valley {
+        private fun from(old: Valley, newExpedition: Pair<Int, Int>? = null): Valley {
             val new = Valley(old.time)
-            new.expedition = old.expedition.copy()
+            if (newExpedition == null) {
+                new.expedition = old.expedition.copy()
+            } else {
+                new.expedition = newExpedition
+            }
 
-            old.blizzards.forEach { new.blizzards.add(Blizzard(it.id, it.type, it.coords.copy())) }
             return new
         }
     }
 }
 
 fun main() {
-    val input = File("day24/test.txt").readLines()
+    val input = File("day24/input.txt").readLines()
     val valley = Valley()
     Valley.start = Pair(0, input[0].indexOfFirst { it == '.' })
     Valley.end = Pair(input.lastIndex, input.last().indexOfFirst { it == '.' })
     Valley.size = Pair(input.size, input[0].length)
-
     valley.expedition = Valley.start
-    var b = 0
+
+    val initialState = mutableListOf<Blizzard>()
     input.forEachIndexed { row, str ->
         str.forEachIndexed { col, c ->
             if (c == '^' || c == 'v' || c == '<' || c == '>') {
-                valley.blizzards.add(Blizzard(b, c, Pair(row, col)))
-                b++
+                initialState.add(Blizzard(c, Pair(row, col)))
             }
         }
     }
 
     var time = 0
-    Valley.states[time] = (valley.blizzards.sortedBy { it.id })
-    var current = valley.blizzards.sortedBy { it.id }
+    Valley.states[time] = initialState.toList()
+    var currentState = initialState.toList()
     do {
-        val next = Valley.nextBlizzardState(current)
-        current = next
+        val nextState = Valley.nextBlizzardState(currentState)
+        currentState = nextState
 
-        if (!Valley.states.containsValue(current)) {
-            Valley.states[++time] = current
+        if (!Valley.states.containsValue(currentState)) {
+            Valley.states[++time] = currentState
         } else {
             break
         }
 
     } while (true)
 
+    val queue = ArrayDeque<Valley>()
+    val visited = Array(Valley.states.size) { Array(Valley.size.first) { BooleanArray(Valley.size.second) { false } } }
+    queue.addLast(valley)
+    visited[0][Valley.start.first][Valley.start.second] = true
+    time = 0
+    while (queue.isNotEmpty()) {
+        val current = queue.removeFirst()
 
-//    val queue = ArrayDeque<Valley>()
-//    val visited = mutableListOf<Valley>()
-//    val blizzardStates = hashMapOf(Pair(0, valley.blizzards))
-//    queue.addLast(valley)
-//    var time = 0
-//    while (queue.isNotEmpty()) {
-//        val current = queue.removeFirst()
-//
-//        println(current.expedition)
-//
-//        if (current.expedition == valley.end) {
-//            time = current.time
-//            break
-//        }
-//
-//        val nextStates = Valley.nextPossibleStates(current, blizzardStates[current.time + 1])
-//        if (nextStates.isNotEmpty()) {
-//
-//            blizzardStates.putIfAbsent(current.time + 1, nextStates[0].blizzards)
-//            nextStates.forEach {
-//                if (!visited.contains(it)) {
-//                    visited.add(it)
-//                    queue.addLast(it)
-//                }
-//            }
-//        }
-//    }
-//
-//    println("The shortest path to the exit takes $time minutes.")
+
+        if (current.expedition == Valley.end) {
+            time = current.time
+            break
+        }
+
+        Valley.determineMoves(current).forEach { move ->
+            if (!visited[move.time % Valley.states.size][move.expedition.first][move.expedition.second]) {
+                visited[move.time % Valley.states.size][move.expedition.first][move.expedition.second] = true
+                queue.addLast(move)
+            }
+        }
+    }
+
+    println("The shortest path to the exit takes $time minutes.")
 }
